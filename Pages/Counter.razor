@@ -1,0 +1,46 @@
+﻿@page "/counter"
+
+@* <PageTitle>Counter</PageTitle>
+
+<h1>Counter</h1>
+
+<p role="status">Current count: @currentCount</p>
+
+<button class="btn btn-primary" @onclick="IncrementCount">Click me</button>
+
+@code {
+    private int currentCount = 0;
+
+    private void IncrementCount()
+    {
+        currentCount++;
+    }
+} *@
+
+@inject AISampleService OpenAIService
+
+<h3>Azure OpenAI Chat</h3>
+
+<input @bind="UserPrompt" placeholder="Ask something..." class="form-control" />
+<button @onclick="SendRequest" class="btn btn-primary mt-2">Send</button>
+
+@if (!string.IsNullOrEmpty(ResponseText))
+{
+    <div class="alert alert-info mt-3">
+        <strong>AI Response:</strong>
+        <p>@ResponseText</p>
+    </div>
+}
+
+@code {
+    private string UserPrompt { get; set; } = "";
+    private string ResponseText { get; set; } = "";
+
+    private async Task SendRequest()
+    {
+        if (!string.IsNullOrEmpty(UserPrompt))
+        {
+            ResponseText = await OpenAIService.GetAIResponse(UserPrompt);
+        }
+    }
+}

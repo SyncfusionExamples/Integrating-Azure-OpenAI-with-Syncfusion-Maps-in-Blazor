@@ -17,39 +17,15 @@ namespace BlazorAISample.Pages
             "hospital5.jpg",
             "hospital6.jpg"
         };
-        private string[] templeImageList = new string[]
-        {
-            "temple1.jpg",
-            "temple2.jpg",
-            "temple3.jpg",
-            "temple4.jpg",
-            "temple5.jpg",
-            "temple6.jpg"
-        };
-        private string[] restaurantImageList = new string[]
-        {
-            "restaurant1.jpg",
-            "restaurant2.jpg",
-            "restaurant3.jpg",
-            "restaurant4.jpg",
-            "restaurant5.jpg",
-            "restaurant6.jpg"
-        };
         private Random _random = new Random();
         public bool SpinnerVisibility { get; set; } = true;
         ObservableCollection<Markers> MarkerCollection = new ObservableCollection<Markers>();
         private string SearchQuery { get; set; } = "Hospitals in New York";
 
-        private string PlaceHolderValue { get; set; } = "Hospitals in New York";
-
         private async Task OnKeyPress(KeyboardEventArgs e)
         {
             if (e.Key == "Enter")
             {
-                if (string.IsNullOrEmpty(SearchQuery))
-                {
-                    SearchQuery = PlaceHolderValue;
-                }
                 MarkerCollection.Clear();
                 SpinnerVisibility = true;
                 await GetMarkerData(SearchQuery);
@@ -59,10 +35,6 @@ namespace BlazorAISample.Pages
         // Method to handle the search icon click
         private async Task OnSearchClick()
         {
-            if (string.IsNullOrEmpty(SearchQuery))
-            {
-                SearchQuery = PlaceHolderValue;
-            }
             MarkerCollection.Clear();
             SpinnerVisibility = true;
             await GetMarkerData(SearchQuery);
@@ -87,7 +59,7 @@ namespace BlazorAISample.Pages
         {
             if (MarkerCollection.Count == 0)
             {
-                await GetMarkerData(PlaceHolderValue);
+                await GetMarkerData(SearchQuery);
             }
         }
 

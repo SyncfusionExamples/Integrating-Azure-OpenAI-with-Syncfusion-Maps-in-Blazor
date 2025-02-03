@@ -1,0 +1,95 @@
+﻿@page "/"
+
+@using Syncfusion.Blazor.Maps
+@using Syncfusion.Blazor.Spinner
+@using System.Net.Http.Json;
+@using Newtonsoft.Json;
+@using Newtonsoft.Json.Linq;
+
+@inject AISampleService OpenAIService
+
+<title>Syncfusion - Smart Location Search</title>
+
+<style>
+    .spacing {
+        margin: 5px;
+    }
+
+    #search-icon:hover {
+        color: black;
+    }
+
+    #search-icon {
+        position: absolute;
+        top: 21px;
+        left: 185px;
+        right: 10px;
+        transform: translateY(-50%);
+        font-size: 16px;
+        color: #aaa;
+        cursor: pointer;
+        z-index: 10;
+    }
+
+    #search-container {
+        position: fixed;
+        top: 90px;
+        left: 300px;
+        z-index: 10;
+        background: transparent;
+        padding: 5px;
+        border-radius: 5px;
+    }
+
+    #search {
+        position: fixed;
+        width: 200px;
+        padding: 5px;
+        border: 1px solid #ccc;
+        border-radius: 3px;
+        font-size: 14px;
+    }
+</style>
+
+<div id="search-container">
+    <input id="search" type="text" @bind="SearchQuery" @bind:event="oninput" placeholder="Hospitals in New York" @onkeypress="OnKeyPress" />
+    <span id="search-icon" @onclick="OnSearchClick">
+        <i class="fas fa-search"></i>
+    </span>
+</div>
+<SfMaps Height="600px">
+    <SfSpinner @bind-Visible="@SpinnerVisibility"></SfSpinner>
+    <MapsEvents Loaded="Loaded"></MapsEvents>
+    <MapsZoomSettings Enable="true" MaxZoom="19" ZoomFactor="1" ShouldZoomInitially="true">
+        <MapsZoomToolbarSettings>
+            <MapsZoomToolbarButton ToolbarItems="new List<ToolbarItem>() { ToolbarItem.Zoom, ToolbarItem.ZoomIn, ToolbarItem.ZoomOut, ToolbarItem.Pan, ToolbarItem.Reset }"></MapsZoomToolbarButton>
+        </MapsZoomToolbarSettings>
+    </MapsZoomSettings>
+    <MapsLayers>
+        <MapsLayer UrlTemplate="https://a.tile.openstreetmap.org/level/tileX/tileY.png" TValue="string">
+            <MapsMarkerSettings>
+                @if (MarkerCollection.Count > 0)
+                {
+                    <MapsMarker TValue="Markers" Visible="true" DataSource="MarkerCollection" AnimationDuration="0" Width="30" Height="30" Shape="Syncfusion.Blazor.Maps.MarkerType.Image" ImageUrl="map_pin.png">
+                        <MapsMarkerTooltipSettings Visible="true">
+                            <TooltipTemplate>
+                                @{
+                                    var Data = context as Markers;
+                                    var SelectedImage = string.Empty;
+                                    if (SearchQuery.Contains("Hospital")) {
+                                        SelectedImage = hospitalImageList[_random.Next(hospitalImageList.Length)];
+                                        <div style="position: relative;width:220px;padding: 20px;background-color: white;border-radius: 10px;box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);text-align: center;"><img src="@SelectedImage" alt="Hospital" style="width: 100%;height: auto;border-radius: 5px;margin-bottom: 10px;" /><p style="margin: 0; font-size: 14px; line-height: 1.5">@Data.PlaceDetails</p></div>
+                                    } else {
+                                        <div style="position: relative;width:220px;padding: 20px;background-color: white;border-radius: 10px;box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);text-align: center;"><p style="margin: 0; font-size: 14px; line-height: 1.5">@Data.PlaceDetails</p></div>
+                                    }
+                                }
+                            </TooltipTemplate>
+                        </MapsMarkerTooltipSettings>
+                    </MapsMarker>
+                }
+            </MapsMarkerSettings>
+        </MapsLayer>
+    </MapsLayers>
+</SfMaps>
+
+

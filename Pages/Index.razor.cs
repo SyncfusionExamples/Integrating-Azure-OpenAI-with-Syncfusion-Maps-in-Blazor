@@ -1,13 +1,12 @@
-﻿using Microsoft.AspNetCore.Components.Web;
-using Newtonsoft.Json;
-using System;
+﻿using Newtonsoft.Json;
+using Syncfusion.Blazor.Inputs;
 using System.Collections.ObjectModel;
-using static System.Runtime.InteropServices.JavaScript.JSType;
 
 namespace BlazorAISample.Pages
 {
     public partial class Index
     {
+        SfTextBox TextBox;
         private string[] hospitalImageList = new string[]
         {
             "hospital1.jpg",
@@ -22,19 +21,9 @@ namespace BlazorAISample.Pages
         ObservableCollection<Markers> MarkerCollection = new ObservableCollection<Markers>();
         private string SearchQuery { get; set; } = "Hospitals in New York";
 
-        private async Task OnKeyPress(KeyboardEventArgs e)
+        private async Task ValueChanged(string changedValue)
         {
-            if (e.Key == "Enter")
-            {
-                MarkerCollection.Clear();
-                SpinnerVisibility = true;
-                await GetMarkerData(SearchQuery);
-            }
-        }
-
-        // Method to handle the search icon click
-        private async Task OnSearchClick()
-        {
+            SearchQuery = !string.IsNullOrEmpty(changedValue) ? changedValue : string.Empty;
             MarkerCollection.Clear();
             SpinnerVisibility = true;
             await GetMarkerData(SearchQuery);
@@ -42,17 +31,28 @@ namespace BlazorAISample.Pages
 
         public async Task GetMarkerData(string value)
         {
-            string result = await OpenAIService.GetAIResponse("Generate" + value + "for 15 important cities as a JSON object, with fields such as 'city_name', 'place_name', 'latitude', 'longitude', 'place_details' and 'address'. Provide the simple address. The information about the place with minimum 150 characters. Strictly provide flat JSON list without nested objects. Strictly provide information in English Language.");
-            if (result.Contains("```json"))
+            if (!string.IsNullOrEmpty(value))
             {
-                string cleanedResponseText = result.Split("```json")[1].Trim();
-                result = cleanedResponseText.Split("```")[0].Trim();
-                if (!string.IsNullOrEmpty(result))
+                string result = await OpenAIService.GetAIResponse("Generate" + value + "for 15 important cities as a JSON object, with fields such as 'city_name', 'place_name', 'latitude', 'longitude', 'place_details' and 'address'. Provide the simple address. The information about the place with minimum 150 characters. Strictly provide flat JSON list without nested objects. Strictly provide information in English Language.");
+                if (result.Contains("```json"))
                 {
-                    MarkerCollection = JsonConvert.DeserializeObject<ObservableCollection<Markers>>(result);
+                    string cleanedResponseText = result.Split("```json")[1].Trim();
+                    result = cleanedResponseText.Split("```")[0].Trim();
+                    if (!string.IsNullOrEmpty(result))
+                    {
+                        MarkerCollection = JsonConvert.DeserializeObject<ObservableCollection<Markers>>(result);
+                    }
                 }
-                SpinnerVisibility = false;
+                else
+                {
+                    MarkerCollection.Clear();
+                }
             }
+            else
+            {
+                MarkerCollection.Clear();
+            }
+            SpinnerVisibility = false;
         }
 
         private async Task Loaded()
@@ -79,6 +79,11 @@ namespace BlazorAISample.Pages
 
             [JsonProperty("place_details")]
             public string PlaceDetails { get; set; }
+        }
+
+        public void AddSearchIcon()
+        {
+            TextBox.AddIconAsync("append", "fas fa-search");
         }
     }
 }
